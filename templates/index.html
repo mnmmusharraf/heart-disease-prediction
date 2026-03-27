@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Heart Disease Prediction</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>Heart Disease Prediction</h1>
+        <p class="subtitle">
+          Enter patient measurements to estimate the probability of heart disease.
+          This tool supports quick testing and clear, readable results.
+        </p>
+      </div>
+      <div class="badge"><span></span> Model loaded</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="hint">Tip: Use dropdowns to avoid invalid values.</div>
+        <div class="actions">
+          <button type="button" class="btn" onclick="fillLow()">Fill Low-risk Example</button>
+          <button type="button" class="btn" onclick="fillHigh()">Fill High-risk Example</button>
+          <button type="button" class="btn btn-ghost" onclick="resetForm()">Reset</button>
+        </div>
+      </div>
+
+      <form method="POST" id="heartForm" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" name="Age" min="1" max="120" step="1" required placeholder="e.g., 58">
+            <div class="help">Years</div>
+          </div>
+
+          <div class="field">
+            <label>Sex</label>
+            <select name="Sex" required>
+              <option value="" disabled selected>Select</option>
+              <option value="0">Female (0)</option>
+              <option value="1">Male (1)</option>
+            </select>
+            <div class="help">0 = Female, 1 = Male</div>
+          </div>
+
+          <div class="field">
+            <label>Chest Pain Type</label>
+            <select name="ChestPain" required>
+              <option value="" disabled selected>Select</option>
+              <option value="1">Type 1</option>
+              <option value="2">Type 2</option>
+              <option value="3">Type 3</option>
+              <option value="4">Type 4</option>
+            </select>
+            <div class="help">Use your dataset’s encoding</div>
+          </div>
+
+          <div class="field">
+            <label>Blood Pressure (BP)</label>
+            <input type="number" name="BP" min="50" max="250" step="1" required placeholder="e.g., 150">
+            <div class="help">mmHg</div>
+          </div>
+
+          <div class="field">
+            <label>Cholesterol</label>
+            <input type="number" name="Cholesterol" min="50" max="700" step="1" required placeholder="e.g., 260">
+            <div class="help">mg/dL</div>
+          </div>
+
+          <div class="field">
+            <label>FBS over 120</label>
+            <select name="FBS" required>
+              <option value="" disabled selected>Select</option>
+              <option value="0">No (0)</option>
+              <option value="1">Yes (1)</option>
+            </select>
+            <div class="help">Fasting blood sugar</div>
+          </div>
+
+          <div class="field">
+            <label>EKG Results</label>
+            <select name="EKG" required>
+              <option value="" disabled selected>Select</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+            <div class="help">Use your dataset’s encoding</div>
+          </div>
+
+          <div class="field">
+            <label>Max Heart Rate (MaxHR)</label>
+            <input type="number" name="MaxHR" min="40" max="230" step="1" required placeholder="e.g., 120">
+            <div class="help">beats/min</div>
+          </div>
+
+          <div class="field">
+            <label>Exercise Angina</label>
+            <select name="ExerciseAngina" required>
+              <option value="" disabled selected>Select</option>
+              <option value="0">No (0)</option>
+              <option value="1">Yes (1)</option>
+            </select>
+            <div class="help">Angina induced by exercise</div>
+          </div>
+
+          <div class="field">
+            <label>ST Depression</label>
+            <input type="number" name="STDepression" min="0" max="10" step="0.1" required placeholder="e.g., 2.3">
+            <div class="help">ST depression induced by exercise</div>
+          </div>
+
+          <div class="field">
+            <label>Slope of ST</label>
+            <select name="Slope" required>
+              <option value="" disabled selected>Select</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <div class="help">Use your dataset’s encoding</div>
+          </div>
+
+          <div class="field">
+            <label>Number of Vessels</label>
+            <select name="Vessels" required>
+              <option value="" disabled selected>Select</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <div class="help">Fluoroscopy vessels count</div>
+          </div>
+
+          <div class="field">
+            <label>Thallium</label>
+            <select name="Thallium" required>
+              <option value="" disabled selected>Select</option>
+              <option value="3">3</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+            <div class="help">Use your dataset’s encoding</div>
+          </div>
+
+          <div class="field full">
+            {% if prediction %}
+              <div class="result" id="resultBox">
+                <div class="row">
+                  <div style="font-weight:700;">Result</div>
+                  <div id="riskPill" class="pill">—</div>
+                </div>
+                <div style="font-size:20px; font-weight:800;">
+                  {{ prediction }}
+                </div>
+                <div class="smallprint">
+                  Note: This is a prediction model output and not a medical diagnosis.
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="smallprint">
+            Please enter values using the same encoding used in training.
+            For real clinical use, consult a qualified professional.
+          </div>
+          <button type="submit" class="btn-primary">Predict</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function setValue(name, value){
+      const el = document.querySelector(`[name="${name}"]`);
+      if(!el) return;
+      el.value = value;
+    }
+
+    function fillHigh(){
+      setValue("Age", 58);
+      setValue("Sex", 1);
+      setValue("ChestPain", 3);
+      setValue("BP", 150);
+      setValue("Cholesterol", 260);
+      setValue("FBS", 1);
+      setValue("EKG", 2);
+      setValue("MaxHR", 120);
+      setValue("ExerciseAngina", 1);
+      setValue("STDepression", 2.3);
+      setValue("Slope", 2);
+      setValue("Vessels", 2);
+      setValue("Thallium", 7);
+      document.getElementById("heartForm").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function fillLow(){
+      setValue("Age", 35);
+      setValue("Sex", 0);
+      setValue("ChestPain", 1);
+      setValue("BP", 110);
+      setValue("Cholesterol", 180);
+      setValue("FBS", 0);
+      setValue("EKG", 0);
+      setValue("MaxHR", 175);
+      setValue("ExerciseAngina", 0);
+      setValue("STDepression", 0.0);
+      setValue("Slope", 1);
+      setValue("Vessels", 0);
+      setValue("Thallium", 3);
+      document.getElementById("heartForm").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function resetForm(){
+      document.getElementById("heartForm").reset();
+      const box = document.getElementById("resultBox");
+      if(box) box.remove();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    (function(){
+      const pred = "{{ prediction|default('') }}";
+      if(!pred) return;
+
+      // expected format: "Heart Disease Probability: 0.9963"
+      const match = pred.match(/([0-9]*\.[0-9]+)/);
+      if(!match) return;
+      const p = parseFloat(match[1]);
+
+      const pill = document.getElementById("riskPill");
+      if(!pill) return;
+
+      if(p < 0.30){
+        pill.textContent = "LOW RISK";
+        pill.className = "pill low";
+      } else if(p < 0.70){
+        pill.textContent = "MEDIUM RISK";
+        pill.className = "pill med";
+      } else {
+        pill.textContent = "HIGH RISK";
+        pill.className = "pill high";
+      }
+    })();
+  </script>
+</body>
+</html>
